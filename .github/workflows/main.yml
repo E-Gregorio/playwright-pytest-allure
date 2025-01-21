@@ -27,6 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install setuptools  # Instala setuptools para asegurarte de que distutils esté disponible
           pip install -r requirements.txt  # Asegúrate de tener tus dependencias en requirements.txt
 
       # Paso 4: Instalar Playwright y dependencias de navegador
