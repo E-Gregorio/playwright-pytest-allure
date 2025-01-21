@@ -1,45 +1,61 @@
-name: Python application
+name: Playwright Python Automation CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    
+    runs-on: ubuntu-24.04  # Usa la última versión de Ubuntu compatible con tu stack
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      # Paso 1: Checkout del código
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+      # Paso 2: Configurar Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'  # Cambia a la versión de Python que estás usando
 
-    - name: Install distutils
-      run: |
-        sudo apt-get update
-        sudo apt-get install python3-distutils
+      # Paso 3: Instalar dependencias
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # Asegúrate de tener tus dependencias en requirements.txt
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        python -m playwright install
-    
-    - name: Run tests
-      run: |
-        pytest --alluredir=allure-results
-    
-    - name: Upload Allure Results
-      uses: actions/upload-artifact@v3
-      with:
-        name: allure-results
-        path: allure-results
+      # Paso 4: Instalar Playwright y dependencias de navegador
+      - name: Install Playwright and browsers
+        run: |
+          pip install playwright
+          python -m playwright install  # Instala los navegadores necesarios para Playwright
 
-    - name: Generate Allure Report
-      run: |
-        allure serve allure-results
+      # Paso 5: Ejecutar pruebas con PyTest
+      - name: Run PyTest tests
+        run: |
+          pytest --maxfail=1 --disable-warnings -q  # Personaliza los parámetros de PyTest según tus necesidades
+
+      # Paso 6: Generar reporte con Allure
+      - name: Generate Allure report
+        run: |
+          pytest --alluredir=allure-results  # Ejecuta PyTest con Allure para generar los resultados
+
+      # Paso 7: Subir reporte de Allure
+      - name: Upload Allure Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-report
+          path: allure-results  # Cambia según la ubicación de los resultados generados por Allure
+          
+      # Paso 8: Subir el reporte Allure generado
+      - name: Upload Allure Report to GitHub Pages (optional)
+        run: |
+          # Si deseas que el reporte sea accesible desde GitHub Pages
+          mv allure-results allure-report
+          tar -czf allure-report.tar.gz allure-report
+          upload-artifact --artifact-name allure-report-allure-results allure-report.tar.gz
