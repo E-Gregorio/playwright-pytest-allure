@@ -21,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'  # Cambia a la versión de Python que estás usando
+          python-version: '3.11'  # Cambia a la versión de Python 3.11
 
       # Paso 3: Instalar dependencias
       - name: Install dependencies
